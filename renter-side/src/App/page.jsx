@@ -21,7 +21,7 @@ export function ApartmentTable({ apartments, onDelete, onToggleStatus }) {
             <TableCell>{apartment.apartment_name}</TableCell>
             <TableCell>{apartment.unit_type}</TableCell>
             <TableCell>{apartment.floorplan || "N/A"}</TableCell>
-            <TableCell>{apartment.specialRequest || "N/A"}</TableCell>
+            <TableCell>{apartment.special_request || "N/A"}</TableCell>
             <TableCell>{apartment.status}</TableCell>
             <TableCell>
               <div className="flex space-x-2">
