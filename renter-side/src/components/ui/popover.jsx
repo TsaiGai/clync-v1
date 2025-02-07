@@ -24,8 +24,4 @@ const PopoverContent = React.forwardRef(({ className, align = "center", sideOffs
 ))
 PopoverContent.displayName = PopoverPrimitive.Content.displayName
 
-<<<<<<< HEAD
 export { Popover, PopoverTrigger, PopoverContent, PopoverAnchor }
-=======
-export { Popover, PopoverTrigger, PopoverContent, PopoverAnchor }
->>>>>>> 159d0d8ec5483764c9d095200241d96275384269

@@ -6,7 +6,6 @@ import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription, CardFooter} from '../components/ui/card';
 import { doSignInWithEmailAndPassword } from '../firebase/auth';
 import { useAuth } from '../contexts/authContext';
-import { Navigate } from 'react-router-dom';
 
 export default function AuthPage() {
   const { userLoggedIn } = useAuth();
