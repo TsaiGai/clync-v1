@@ -50,24 +50,9 @@ export default function Dashboard({ userId }) {
     }
   }
 
-  async function handleAddApartment(newApartment) {
-    try {
-      const response = await fetch("http://localhost:5000/api/apartments", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newApartment),
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to add apartment")
-      }
-
-      const addedApartment = await response.json()
-      setApartments([...apartments, addedApartment])
-    } catch (error) {
-      console.error("Failed to add apartment", error)
-    }
-  }
+  const handleAddApartment = (newApartment) => {
+    setApartments((prev) => [...prev, newApartment]); // ✅ Only updates state
+  };
 
   return (
     <div className="container mx-auto p-6">

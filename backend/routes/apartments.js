@@ -16,11 +16,36 @@ router.get("/", async (req, res) => {
 // ADD a new apartment
 router.post("/", async (req, res) => {
   try {
+    const { apartment_name, unit_type, floorplan, special_request, users } = req.body;
+
+    if (!apartment_name || !unit_type) {
+      return res.status(400).json({ error: "apartment_name and unit_type are required" });
+    }
+
+    // Validate users array
+    if (!Array.isArray(users) || users.length === 0) {
+      return res.status(400).json({ error: "At least one user ID must be provided" });
+    }
+
+    // Check if an apartment with the same name & user already exists
+    const existingApartment = await Apartment.findOne({ apartment_name, users });
+    if (existingApartment) {
+      return res.status(400).json({ error: "Apartment already exists for this user." });
+    }
+
     const newApartment = new Apartment(req.body);
     await newApartment.save();
+
+    // ✅ Associate the apartment with each user
+    await User.updateMany(
+      { _id: { $in: users } },
+      { $push: { apartments: newApartment._id } }
+    );
+
     res.status(201).json(newApartment);
   } catch (error) {
-    res.status(400).json({ error: "Failed to create apartment" });
+    console.error("Error creating apartment:", error);
+    res.status(400).json({ error: error.message });
   }
 });
 

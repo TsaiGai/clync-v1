@@ -14,15 +14,53 @@ export function AddApartmentPopover({ onAddApartment }) {
   const [specialRequest, setSpecialRequest] = useState("")
   const [open, setOpen] = useState(false)
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    onAddApartment({ propertyName, floorPlanType, floorPlanName, specialRequest })
-    setPropertyName("")
-    setFloorPlanType("")
-    setFloorPlanName("")
-    setSpecialRequest("")
-    setOpen(false)
-  }
+  const [isSubmitting, setIsSubmitting] = useState(false); // Track submission state
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (isSubmitting) return; // Prevent double submit
+    setIsSubmitting(true); // Disable button while submitting
+
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      console.error("User ID is missing!");
+      setIsSubmitting(false);
+      return;
+    }
+
+    const apartmentData = {
+      apartment_name: propertyName,
+      unit_type: floorPlanType,
+      floorplan: floorPlanName,
+      special_request: specialRequest,
+      users: [userId],
+    };
+
+    try {
+      const response = await fetch("http://localhost:5000/api/apartments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(apartmentData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add apartment");
+      }
+
+      const newApartment = await response.json();
+
+      onAddApartment(newApartment); // Update UI
+      setPropertyName("");
+      setFloorPlanType("");
+      setFloorPlanName("");
+      setSpecialRequest("");
+      setOpen(false);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsSubmitting(false); // Re-enable button
+    }
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
