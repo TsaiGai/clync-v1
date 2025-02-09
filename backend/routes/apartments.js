@@ -75,20 +75,6 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-// TOGGLE status
-router.put("/:id/toggle", async (req, res) => {
-  try {
-    const apartment = await Apartment.findById(req.params.id);
-    if (!apartment) return res.status(404).json({ error: "Apartment not found" });
-
-    apartment.status = apartment.status === "active" ? "inactive" : "active"; // ✅ Fix 2: Ensure `status` field exists in schema
-    await apartment.save();
-    res.json({ message: "Status updated", status: apartment.status });
-  } catch (error) {
-    res.status(500).json({ error: "Failed to update status" });
-  }
-});
-
 // GET apartments for a specific user (Alternative fix ✅)
 router.get("/user/:userId", async (req, res) => { 
   try {

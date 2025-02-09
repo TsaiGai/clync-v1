@@ -34,22 +34,6 @@ export default function Dashboard({ userId }) {
     }
   }
 
-  async function handleToggleStatus(apartmentId) {
-    try {
-      const response = await fetch(`http://localhost:5000/api/apartments/${apartmentId}/toggle`, {
-        method: "PUT",
-      })
-      const updatedApartment = await response.json()
-      setApartments(
-        apartments.map((apt) =>
-          apt._id === apartmentId ? { ...apt, status: updatedApartment.status } : apt
-        )
-      )
-    } catch (error) {
-      console.error("Failed to update apartment status", error)
-    }
-  }
-
   const handleAddApartment = (newApartment) => {
     setApartments((prev) => [...prev, newApartment]); // ✅ Only updates state
   };
@@ -64,7 +48,6 @@ export default function Dashboard({ userId }) {
       <ApartmentTable
         apartments={apartments}
         onDelete={handleDelete}
-        onToggleStatus={handleToggleStatus}
       />
     </div>
   )
