@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardHeader, CardContent, CardTitle, CardDescription, CardFooter} from '../components/ui/card';
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardHeader, CardContent, CardTitle, CardDescription, CardFooter } from "../components/ui/card";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -12,14 +12,26 @@ export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  
+  const navigate = useNavigate(); // ✅ Correct: Use this at the top level
+  const auth = getAuth();
+
+  // ✅ Move useEffect outside handleSubmit
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        console.log("User detected, redirecting...");
+        navigate("/dashboard");
+      }
+    });
+
+    return () => unsubscribe();
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    const auth = getAuth();
-    
     try {
       if (isLogin) {
         // ✅ Firebase Sign In
@@ -27,10 +39,8 @@ export default function AuthPage() {
       } else {
         // ✅ Firebase Sign Up
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        await userCredential.user.updateProfile({ displayName: name });
+        await updateProfile(userCredential.user, { displayName: name });
       }
-
-      navigate("/dashboard"); // ✅ Redirect after success
     } catch (error) {
       console.error("Authentication Error:", error.message);
       alert(error.message);

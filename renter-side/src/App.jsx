@@ -24,18 +24,7 @@ function App() {
         <Route path="/auth" element={<AuthPage />} />
 
         {/* Protected Dashboard Page */}
-        <Route
-          path="/dashboard"
-          element={
-            user ? (
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            ) : (
-              <Navigate to="/auth" replace />
-            )
-          }
-        />
+        <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/auth" replace />} />
 
         {/* Default Route: Redirect to Auth Page */}
         <Route path="*" element={<Navigate to="/auth" replace />} />
