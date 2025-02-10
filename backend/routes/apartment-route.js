@@ -1,7 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User');
-const Apartment = require('../models/apartment.model');
 const { authenticate } = require('../auth/firebase-auth.js');
 const {
 	createUserApartment,
