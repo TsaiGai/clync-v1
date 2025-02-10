@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { getAuth } from "firebase/auth" // Import Firebase Auth
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,39 +13,33 @@ export function AddApartmentPopover({ onAddApartment }) {
   const [floorPlanName, setFloorPlanName] = useState("")
   const [specialRequest, setSpecialRequest] = useState("")
   const [open, setOpen] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const [isSubmitting, setIsSubmitting] = useState(false); // Track submission state
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isSubmitting) return;
-    setIsSubmitting(true);
+    if (isSubmitting) return; // Prevent double submit
+    setIsSubmitting(true); // Disable button while submitting
 
-    // Get the Firebase authentication token
-    const auth = getAuth();
-    const user = auth.currentUser;
-
-    if (!user) {
-      console.error("User is not logged in!");
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      console.error("User ID is missing!");
       setIsSubmitting(false);
       return;
     }
-
-    const token = await user.getIdToken(); // Fetch Firebase auth token
 
     const apartmentData = {
       apartment_name: propertyName,
       unit_type: floorPlanType,
       floorplan: floorPlanName,
       special_request: specialRequest,
+      users: [userId],
     };
 
     try {
       const response = await fetch("http://localhost:5000/api/apartments", {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}` // Include Firebase auth token
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(apartmentData),
       });
 
@@ -55,8 +48,8 @@ export function AddApartmentPopover({ onAddApartment }) {
       }
 
       const newApartment = await response.json();
-      onAddApartment(newApartment);
 
+      onAddApartment(newApartment); // Update UI
       setPropertyName("");
       setFloorPlanType("");
       setFloorPlanName("");
@@ -65,7 +58,7 @@ export function AddApartmentPopover({ onAddApartment }) {
     } catch (error) {
       console.error(error);
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false); // Re-enable button
     }
   };
 
@@ -97,8 +90,8 @@ export function AddApartmentPopover({ onAddApartment }) {
             <Label htmlFor="specialRequest">Special Request (Optional)</Label>
             <Textarea id="specialRequest" value={specialRequest} onChange={(e) => setSpecialRequest(e.target.value)} />
           </div>
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? "Adding..." : "Add Apartment"}
+          <Button type="submit" className="w-full">
+            Add Apartment
           </Button>
         </form>
       </PopoverContent>

@@ -1,43 +1,45 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import React, { useState, useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription, CardFooter} from '../components/ui/card';
+import { doSignInWithEmailAndPassword } from '../firebase/auth';
+import { useAuth } from '../contexts/authContext';
 
 export default function AuthPage() {
+  const { userLoggedIn } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
-  const [name, setName] = useState(""); 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  const [redirect, setRedirect] = useState(false); // <-- Ensure this is defined here
+ 
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-
-    const auth = getAuth();
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const endpoint = isLogin ? "http://localhost:5000/api/auth/login" : "http://localhost:5000/api/auth/register";
     
-    try {
-      if (isLogin) {
-        // ✅ Firebase Sign In
-        await signInWithEmailAndPassword(auth, email, password);
-      } else {
-        // ✅ Firebase Sign Up
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        await userCredential.user.updateProfile({ displayName: name });
-      }
+        try {
+            const response = await fetch(endpoint, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, email, password }),
+            });
+    
+            const data = await response.json();
+            if (data.token) {
+                localStorage.setItem("userId", data.userId); // Store userId
+                localStorage.setItem("token", data.token); // Store token for future API requests
+                window.location.href = "/dashboard"; // Redirect after login
+            } else {
+                alert("Invalid credentials");
+            }
+        } catch (error) {
+            console.error("Login failed:", error);
+        }
+    };
 
-      navigate("/dashboard"); // ✅ Redirect after success
-    } catch (error) {
-      console.error("Authentication Error:", error.message);
-      alert(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -45,7 +47,9 @@ export default function AuthPage() {
         <CardHeader>
           <CardTitle>{isLogin ? "Login" : "Sign Up"}</CardTitle>
           <CardDescription>
-            {isLogin ? "Enter your credentials to access your account" : "Create an account to get started"}
+            {isLogin
+              ? "Enter your credentials to access your account"
+              : "Create an account to get started"}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -57,8 +61,6 @@ export default function AuthPage() {
                   <Input
                     id="name"
                     placeholder="John Doe"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
                     required
                   />
                 </div>
@@ -85,18 +87,23 @@ export default function AuthPage() {
                 />
               </div>
             </div>
-            <Button type="submit" className="w-full mt-4" disabled={loading}>
-              {loading ? "Processing..." : isLogin ? "Login" : "Sign Up"}
+            <Button type="submit" className="w-full mt-4">
+              {isLogin ? "Login" : "Sign Up"}
             </Button>
           </form>
         </CardContent>
         <CardFooter>
-          <Button variant="link" className="w-full" onClick={() => setIsLogin(!isLogin)}>
-            {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Login"}
+          <Button
+            variant="link"
+            className="w-full"
+            onClick={() => setIsLogin(!isLogin)}
+          >
+            {isLogin
+              ? "Don't have an account? Sign Up"
+              : "Already have an account? Login"}
           </Button>
         </CardFooter>
       </Card>
     </div>
   );
 }
-

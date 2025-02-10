@@ -1,54 +1,95 @@
-import { useEffect, useState } from "react"
-import { ApartmentTable } from "./page"
-import { Button } from "@/components/ui/button"
-import { AddApartmentPopover } from "../components/ui/add-apartment-popover"  // Import the Popover
+"use client";
 
-export default function Dashboard({ userId }) {
-  const [apartments, setApartments] = useState([])
+import { useEffect, useState } from "react";
+import { getAuth } from "firebase/auth"; 
+import { ApartmentTable } from "./page";
+import { Button } from "@/components/ui/button";
+import { AddApartmentPopover } from "../components/ui/add-apartment-popover";
+
+export default function Dashboard() {
+  const [apartments, setApartments] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!userId) return  // Ensure userId exists before fetching
-
     async function fetchUserApartments() {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (!user) {
+        console.error("User not logged in");
+        setLoading(false);
+        return;
+      }
+
       try {
-        const response = await fetch(`http://localhost:5000/api/users/${userId}/apartments`)
+        const token = await user.getIdToken();
+
+        const response = await fetch("http://localhost:5000/api/apartments", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+
         if (!response.ok) {
-          throw new Error("Failed to fetch apartments")
+          throw new Error("Failed to fetch apartments");
         }
-        const data = await response.json()
-        setApartments(data)
+
+        const data = await response.json();
+        setApartments(data);
       } catch (error) {
-        console.error(error.message)
+        console.error(error.message);
+      } finally {
+        setLoading(false);
       }
     }
 
-    fetchUserApartments()
-  }, [userId])
+    fetchUserApartments();
+  }, []);
 
   async function handleDelete(apartmentId) {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (!user) {
+      console.error("User not logged in");
+      return;
+    }
+
     try {
-      await fetch(`http://localhost:5000/api/apartments/${apartmentId}`, { method: "DELETE" })
-      setApartments(apartments.filter((apartment) => apartment._id !== apartmentId))
+      const token = await user.getIdToken();
+
+      const response = await fetch(`http://localhost:5000/api/apartments/${apartmentId}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete apartment");
+      }
+
+      setApartments(apartments.filter((apartment) => apartment._id !== apartmentId));
     } catch (error) {
-      console.error("Failed to delete apartment", error)
+      console.error("Failed to delete apartment", error);
     }
   }
 
   const handleAddApartment = (newApartment) => {
-    setApartments((prev) => [...prev, newApartment]); // ✅ Only updates state
+    setApartments((prev) => [...prev, newApartment]);
   };
 
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-2xl font-bold mb-4">Welcome to Clync</h1>
-      
-      {/* Replace Button with AddApartmentPopover */}
+
       <AddApartmentPopover onAddApartment={handleAddApartment} />
-      
-      <ApartmentTable
-        apartments={apartments}
-        onDelete={handleDelete}
-      />
+
+      {loading ? (
+        <p>Loading apartments...</p>
+      ) : (
+        <ApartmentTable apartments={apartments} onDelete={handleDelete} />
+      )}
     </div>
-  )
+  );
 }

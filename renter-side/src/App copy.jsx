@@ -1,20 +1,24 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import AuthPage from "./App/AuthPage";
-import Dashboard from "./App/Dashboard";
+import { ApartmentTable } from "./App/page";
 import ProtectedRoute from "./routes/ProtectedRoute"; 
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import Dashboard from "./App/Dashboard";
+
+function getUserId() {
+  return localStorage.getItem("userId"); // Retrieve userId from storage
+}
 
 function App() {
-  const [user, setUser] = useState(null);
+  const [userId, setUserId] = useState(localStorage.getItem("userId"));
 
   useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
+    const checkStorage = () => {
+      setUserId(localStorage.getItem("userId"));
+    };
 
-    return () => unsubscribe();
+    window.addEventListener("storage", checkStorage);
+    return () => window.removeEventListener("storage", checkStorage);
   }, []);
 
   return (
@@ -27,9 +31,9 @@ function App() {
         <Route
           path="/dashboard"
           element={
-            user ? (
+            userId ? (
               <ProtectedRoute>
-                <Dashboard />
+                <Dashboard userId={userId} />
               </ProtectedRoute>
             ) : (
               <Navigate to="/auth" replace />
@@ -45,4 +49,3 @@ function App() {
 }
 
 export default App;
-
