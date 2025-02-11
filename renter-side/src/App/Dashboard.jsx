@@ -10,43 +10,6 @@ export default function Dashboard() {
   const [apartments, setApartments] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // useEffect(() => {
-  //   fetchUserApartments();
-  // }, []);
-
-  // // async function fetchUserApartments() {
-  // //   const auth = getAuth();
-  // //   const user = auth.currentUser;
-  // //   if (!user) {
-  // //     console.error("User not logged in");
-  // //     setLoading(false);
-  // //     return;
-  // //   }
-
-  // //   try {
-  // //     const token = await user.getIdToken();
-
-  // //     const response = await fetch("http://localhost:5000/apartments", {
-  // //       method: "GET",
-  // //       headers: {
-  // //         "Content-Type": "application/json",
-  // //         "Authorization": `Bearer ${token}`,
-  // //       },
-  // //     });
-
-  // //     if (!response.ok) {
-  // //       throw new Error("Failed to fetch apartments");
-  // //     }
-
-  // //     const data = await response.json();
-  // //     setApartments(data);
-  // //   } catch (error) {
-  // //     console.error(error.message);
-  // //   } finally {
-  // //     setLoading(false);
-  // //   }
-  // // }
-
   async function fetchToken() {
     const auth = getAuth();
     const user = auth.currentUser;
