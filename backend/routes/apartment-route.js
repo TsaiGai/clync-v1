@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../auth/firebase-auth.js');
+const authMiddleware = require("../middleware/authMiddleware");
 const {
 	createUserApartment,
 	getUserApartments,
@@ -10,11 +11,11 @@ const {
 
 router.use(authenticate);
 
-//Create a user apartment (Step called when sign up is done)
+// Create a user apartment (Step called when sign up is done)
 router.post('/users', createUserApartment);
 
 // Route to get all apartments for a user (Step called when dashboard is loaded)
-router.get('/apartments', getUserApartments);
+router.get("/apartments", authMiddleware, getUserApartments);
 
 // Route to add a new apartment to a user’s list (Step called when user clicks add it in)
 router.post('/apartments', addApartmentToUser);

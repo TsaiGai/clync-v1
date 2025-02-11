@@ -1,7 +1,6 @@
-"use client"
+"use client";
 
 import { useState } from "react"
-import { getAuth } from "firebase/auth" // Import Firebase Auth
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -21,18 +20,6 @@ export function AddApartmentPopover({ onAddApartment }) {
     if (isSubmitting) return;
     setIsSubmitting(true);
 
-    // Get the Firebase authentication token
-    const auth = getAuth();
-    const user = auth.currentUser;
-
-    if (!user) {
-      console.error("User is not logged in!");
-      setIsSubmitting(false);
-      return;
-    }
-
-    const token = await user.getIdToken(); // Fetch Firebase auth token
-
     const apartmentData = {
       apartment_name: propertyName,
       unit_type: floorPlanType,
@@ -41,22 +28,7 @@ export function AddApartmentPopover({ onAddApartment }) {
     };
 
     try {
-      const response = await fetch("http://localhost:5000/api/apartments", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}` // Include Firebase auth token
-        },
-        body: JSON.stringify(apartmentData),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to add apartment");
-      }
-
-      const newApartment = await response.json();
-      onAddApartment(newApartment);
-
+      await onAddApartment(apartmentData); // Call function from Dashboard
       setPropertyName("");
       setFloorPlanType("");
       setFloorPlanName("");
@@ -82,12 +54,7 @@ export function AddApartmentPopover({ onAddApartment }) {
           </div>
           <div className="space-y-2">
             <Label htmlFor="floorPlanType">Floor Plan Type</Label>
-            <Input
-              id="floorPlanType"
-              value={floorPlanType}
-              onChange={(e) => setFloorPlanType(e.target.value)}
-              required
-            />
+            <Input id="floorPlanType" value={floorPlanType} onChange={(e) => setFloorPlanType(e.target.value)} required />
           </div>
           <div className="space-y-2">
             <Label htmlFor="floorPlanName">Floor Plan Name (Optional)</Label>
@@ -103,5 +70,5 @@ export function AddApartmentPopover({ onAddApartment }) {
         </form>
       </PopoverContent>
     </Popover>
-  )
+  );
 }

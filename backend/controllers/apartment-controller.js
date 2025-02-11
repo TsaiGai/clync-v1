@@ -60,20 +60,19 @@ const createUserApartment = async (req, res) => {
  */
 const getUserApartments = async (req, res) => {
 	try {
-		// Retrieve uid from headers (or req.params if you prefer)
-		const uid = req.headers.uid;
-		const user = await User.findOne({ uid });
-
-		if (!user) {
-			return res.status(404).json({ message: 'User not found' });
-		}
-
-		// Return the apartments array
-		res.status(200).json(user.apartments);
+	  const uid = req.user.uid; // Get user UID from decoded token
+	  const user = await User.findOne({ uid });
+  
+	  if (!user) {
+		return res.status(404).json({ message: "User not found" });
+	  }
+  
+	  res.status(200).json(user.apartments);
 	} catch (error) {
-		res.status(500).json({ message: 'Error retrieving apartments.' });
+	  res.status(500).json({ message: "Error retrieving apartments." });
 	}
-};
+  };
+  
 
 /*
  * Endpoint: POST /apartments

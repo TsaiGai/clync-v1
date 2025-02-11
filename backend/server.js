@@ -18,7 +18,7 @@ connectDB();
 // app.use('/api/auth', authRoutes);
 // app.use('/api/apartments', apartmentRoutes);
 // app.use('/api/users', userRoutes); // ✅ Now all user-related requests go through /api/users
-app.use('/api/data', apartmentRoutes);
+app.use('/api', apartmentRoutes);
 
 // Start Server
 const PORT = process.env.PORT || 5000;
