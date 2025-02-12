@@ -12,6 +12,7 @@ export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [redirect, setRedirect] = useState(false); // <-- Ensure this is defined here
  
@@ -60,6 +61,8 @@ export default function AuthPage() {
                   <Label htmlFor="name">Name</Label>
                   <Input
                     id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                     placeholder="John Doe"
                     required
                   />
